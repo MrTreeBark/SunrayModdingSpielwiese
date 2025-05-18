@@ -65,10 +65,11 @@ bool blockKidnapByUndocking;                // Svol0: kidnap detection is blocke
 unsigned long dockGpsRebootTime;            // Svol0: retry timer for gps-fix after gps-reboot
 unsigned long dockGpsRebootFixCounter;      // Svol0: waitingtime for fix after gps-reboot
 unsigned long dockGpsRebootFeedbackTimer;   // Svol0: timer to generate acustic feedback
-unsigned long reachedPointBeforeDockTime = 0;   //MrTree
+
 bool dockGpsRebootDistGpsTrg = false;       // Svol0: trigger to check solid gps-fix position (no jump)
 bool allowDockLastPointWithoutGPS = false;  // Svol0: allow go on docking by loosing gps fix
 */
+unsigned long reachedPointBeforeDockTime = 0;   //MrTree
 bool allowDockRotation = true;              //MrTree: disable rotation on last dockingpoint
 //bool warnDockWithoutGpsTrg = false;         // Svol0: Trigger for warnmessage
 float stateX_1 = 0;                         // Svol0

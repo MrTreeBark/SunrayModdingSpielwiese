@@ -949,7 +949,7 @@ bool detectObstacle(){
     //resetLinearMotionMeasurement();
     //resetAngularMotionMeasurement();
     //resetStateEstimation();
-    if BUMPER_SIDES {
+    if (BUMPER_SIDES) {
       if (bumper.obstacleLeft()){
         CONSOLE.println("BUMPER: bumper left obstacle!");  
         maps.setObstaclePosition(stateX, stateY, 35.0, MOWER_RADIUS_FRONT, OBSTACLE_DIAMETER);  
@@ -957,12 +957,14 @@ bool detectObstacle(){
         CONSOLE.println("BUMPER: bumper right obstacle!");
         maps.setObstaclePosition(stateX, stateY, -35.0, MOWER_RADIUS_FRONT, OBSTACLE_DIAMETER);
       }
-    } else maps.setObstaclePosition(stateX, stateY, 0, MOWER_RADIUS_FRONT, OBSTACLE_DIAMETER);
+    } else {
+        maps.setObstaclePosition(stateX, stateY, 0, MOWER_RADIUS_FRONT, OBSTACLE_DIAMETER);
+    }
     triggerObstacle();    
     return true;
   }
 
-  if ( (millis() > linearMotionStartTime + LIDAR_BUMPER_DEADTIME) && (lidarBumper.obstacle()) ){  
+  if ((millis() > linearMotionStartTime + LIDAR_BUMPER_DEADTIME) && lidarBumper.obstacle()){  
     CONSOLE.println("LiDAR bumper obstacle!");    
     Logger.event(EVT_LIDAR_BUMPER_OBSTACLE);
     statMowBumperCounter++;
@@ -1296,26 +1298,26 @@ void run(){
       }   
     }
 
-  // LED states
-  if (millis() > nextLedTime){
-    nextLedTime = millis() + 1000;
-    robotDriver.ledStateGpsFloat = (gps.solution == SOL_FLOAT);
-    robotDriver.ledStateGpsFix = (gps.solution == SOL_FIXED);
-    robotDriver.ledStateError = (stateOp == OP_ERROR);            
-  }
+    // LED states
+    if (millis() > nextLedTime){
+      nextLedTime = millis() + 1000;
+      robotDriver.ledStateGpsFloat = (gps.solution == SOL_FLOAT);
+      robotDriver.ledStateGpsFix = (gps.solution == SOL_FIXED);
+      robotDriver.ledStateError = (stateOp == OP_ERROR);            
+    }
 
-  
-   
-  if (millis() > nextTimetableTime){
-    nextTimetableTime = millis() + 30000;
-    gps.decodeTOW();
-    timetable.setCurrentTime(gps.hour, gps.mins, gps.dayOfWeek);
-    timetable.run();
-  }
-  
-  calcStats();
-  
-  
+    
+    
+    if (millis() > nextTimetableTime){
+      nextTimetableTime = millis() + 30000;
+      gps.decodeTOW();
+      timetable.setCurrentTime(gps.hour, gps.mins, gps.dayOfWeek);
+      timetable.run();
+    }
+    
+    calcStats();
+    
+    
     if (!robotShouldMove()){
           resetLinearMotionMeasurement();
           updateGPSMotionCheckTime();  
@@ -1330,9 +1332,9 @@ void run(){
     }
     motor.run();
     computeRobotState();
-    
+      
 
-    
+      
 
     /*if (gpsJump) {
       // gps jump: restart current operation from new position (restart path planning)
@@ -1361,8 +1363,7 @@ void run(){
 
     if (battery.underVoltage()){
       activeOp->onBatteryUndervoltage();
-    } 
-    else {      
+    } else {      
       if (USE_TEMP_SENSOR){
         if (stateTemp > DOCK_OVERHEAT_TEMP){
           CONSOLE.print("Max Temperature triggered: ");
@@ -1387,10 +1388,10 @@ void run(){
       }    
       if (battery.shouldGoHome()){
         if (DOCKING_STATION){
-           activeOp->onBatteryLowShouldDock();
+            activeOp->onBatteryLowShouldDock();
         }
       }   
-       
+        
       if (battery.chargerConnected()){
         if (battery.chargingHasCompleted()){
           activeOp->onChargingCompleted();
@@ -1432,40 +1433,41 @@ void run(){
 
     // update operation type      
     stateOp = activeOp->getGoalOperationType();  
-  }   // if (millis() >= nextControlTime)
-    
-  // ----- read serial input (BT/console) -------------
-  processComm();
-  if (OUTPUT_ENABLED) outputConsole();    
+      // if (millis() >= nextControlTime)
+      
+    // ----- read serial input (BT/console) -------------
+    processComm();
+    if (OUTPUT_ENABLED) outputConsole();    
 
-  // reset watchdog, keep calm
-  if(millis() > wdResetTimer + 1000){
-    watchdogReset();
-  }   
+    // reset watchdog, keep calm
+    if(millis() > wdResetTimer + 1000){
+      watchdogReset();
+    }   
+    if (CALC_LOOPTIME){
+      loopTimeNow = millis() - loopTime;
+      loopTimeMin = min(loopTimeNow, loopTimeMin); 
+      loopTimeMax = max(loopTimeNow, loopTimeMax);
+      loopTimeMean = 0.99 * loopTimeMean + 0.01 * loopTimeNow; 
+      loopTime = millis();
 
-  loopTimeNow = millis() - loopTime;
-  loopTimeMin = min(loopTimeNow, loopTimeMin); 
-  loopTimeMax = max(loopTimeNow, loopTimeMax);
-  loopTimeMean = 0.99 * loopTimeMean + 0.01 * loopTimeNow; 
-  loopTime = millis();
-
-    if(millis() > loopTimeTimer + 10000){
-      if(loopTimeMax > 500){
-        CONSOLE.print("WARNING - LoopTime: ");
-      }else{
-        CONSOLE.print("Info - LoopTime: ");
+      if(millis() > loopTimeTimer + 10000){
+        if(loopTimeMax > 500){
+          CONSOLE.print("WARNING - LoopTime: ");
+        }else{
+          CONSOLE.print("Info - LoopTime(ms) now= ");
+        }
+        CONSOLE.print(loopTimeNow);
+        CONSOLE.print(" - ");
+        CONSOLE.print(loopTimeMin);
+        CONSOLE.print(" - ");
+        CONSOLE.print(loopTimeMean);
+        CONSOLE.print(" - ");
+        CONSOLE.print(loopTimeMax);
+        CONSOLE.println("ms");
+        loopTimeMin = 99999; 
+        loopTimeMax = 0;
+        loopTimeTimer = millis();
       }
-      CONSOLE.print(loopTimeNow);
-      CONSOLE.print(" - ");
-      CONSOLE.print(loopTimeMin);
-      CONSOLE.print(" - ");
-      CONSOLE.print(loopTimeMean);
-      CONSOLE.print(" - ");
-      CONSOLE.print(loopTimeMax);
-      CONSOLE.println("ms");
-      loopTimeMin = 99999; 
-      loopTimeMax = 0;
-      loopTimeTimer = millis();
     }   
   }
 

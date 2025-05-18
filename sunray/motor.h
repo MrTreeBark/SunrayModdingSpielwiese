@@ -141,6 +141,7 @@ class Motor {
     float deltaControlTimeSec;    
     unsigned long lastControlTime;    
     //unsigned long nextSenseTime;
+    unsigned long motorReleaseBrakesTime;
     unsigned long lastMowStallCheckTime;  //MrTree
     unsigned long drvfixtimer;            //MrTree 
     bool drvfixreset;                     //MrTree 
