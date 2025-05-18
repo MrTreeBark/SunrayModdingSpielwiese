@@ -55,7 +55,8 @@ class SimMotorDriver: public MotorDriver {
     SimMotorDriver(SimRobotDriver &sr);
     void begin() override;
     void run() override;
-    void setMotorPwm(int leftPwm, int rightPwm, int mowPwm) override;
+    void setMowHeight(int mowHeightMillimeter) override;
+    void setMotorPwm(int leftPwm, int rightPwm, int mowPwm, bool releaseBrakesWhenZero) override;
     void getMotorFaults(bool &leftFault, bool &rightFault, bool &mowFault) override;
     void resetMotorFaults()  override;
     void getMotorCurrent(float &leftCurrent, float &rightCurrent, float &mowCurrent) override;
@@ -101,6 +102,7 @@ class SimBumperDriver: public BumperDriver {
     SimBumperDriver(SimRobotDriver &sr);
     void begin() override;
     void run() override;
+    bool nearObstacle() override;    
     bool obstacle() override;
     bool getLeftBumper() override;
     bool getRightBumper() override;
@@ -186,6 +188,8 @@ class SimGpsDriver : public GpsDriver {
     void run() override;
     bool configure() override;  
     void reboot() override;
+    void send(const uint8_t *buffer, size_t size) override;  
+    void sendRTCM(const uint8_t *buffer, size_t size) override;  
     // ----- simulate errors, sensor triggers ----
     void setSimSolution(SolType sol);
     void setSimGpsJump(bool flag);

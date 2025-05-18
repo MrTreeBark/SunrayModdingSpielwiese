@@ -39,7 +39,7 @@
 #include "timetable.h"
 
 //this is the modversion 
-#define VER "Sunraymod,1.0.322"
+#define VER "Sunraymod,1.0.325"
 
 // operation types
 enum OperationType {
@@ -87,6 +87,7 @@ extern float stateTemp;  // current temperature
 extern float setSpeed; // linear speed (m/s)
 extern int fixTimeout;
 extern bool finishAndRestart; // auto-restart when mowing finished?
+extern bool dockAfterFinish; // dock after mowing finished?
 extern bool absolutePosSource;
 extern double absolutePosSourceLon;
 extern double absolutePosSourceLat;
@@ -155,7 +156,7 @@ extern int motorMowStallCounter; //MrTree
 #ifdef DRV_SIM_ROBOT
   extern SimImuDriver imuDriver;
 #elif defined(GPS_LIDAR)
-  LidarImuDriver imuDriver;
+  extern LidarImuDriver imuDriver;
 #elif defined(BNO055)
   extern BnoDriver imuDriver; 
 #elif defined(ICM20948)
@@ -169,6 +170,7 @@ extern Battery battery;
 extern BLEConfig bleConfig;
 extern Bumper bumper;
 extern Buzzer buzzer;
+extern LidarBumperDriver lidarBumper;
 extern Sonar sonar;
 extern VL53L0X tof; //remove me
 extern PinManager pinMan;

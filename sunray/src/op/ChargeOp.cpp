@@ -8,6 +8,8 @@
 #include "../../robot.h"
 #include "../../StateEstimator.h"
 #include "../../map.h"
+#include "../../events.h"
+#include "../../helper.h"
 
 
 String ChargeOp::name(){
@@ -16,6 +18,7 @@ String ChargeOp::name(){
 
 
 void ChargeOp::begin(){
+    Logger.event(EVT_CHARGER_CONNECTED);
     nextConsoleDetailsTime = 0;
     retryTouchDock = false;
     betterTouchDock = false;
@@ -25,6 +28,9 @@ void ChargeOp::begin(){
     CONSOLE.print(" dockReasonRainTriggered=");
     CONSOLE.println(dockOp.dockReasonRainTriggered);
 
+    if (DOCK_RELEASE_BRAKES){
+        motor.setReleaseBrakesWhenZero(true);
+    }
     //motor.stopImmediately(true); // do not use PID to get to stop 
     motor.setLinearAngularSpeed(0,0, false); 
     motor.setMowState(false);     
@@ -84,13 +90,15 @@ void ChargeOp::run(){
         if (millis() > retryTouchDockSpeedTime){                            
             retryTouchDockSpeedTime = millis() + 1000;
             motor.enableTractionMotors(true); // allow traction motors to operate                               
-            motor.setLinearAngularSpeed(0.05, 0);
+            if (DOCK_FRONT_SIDE) motor.setLinearAngularSpeed(0.05, 0);
+                else motor.setLinearAngularSpeed(-0.03, 0);
         }
         if (retryTouchDock){
             if (millis() > retryTouchDockStopTime) {
                 motor.setLinearAngularSpeed(0, 0);
                 retryTouchDock = false;
                 CONSOLE.println("ChargeOp: retryTouchDock failed");
+                Logger.event(EVT_DOCK_RECOVERY_GIVEUP);
                 motor.enableTractionMotors(true); // allow traction motors to operate                               
                 maps.setIsDocked(false);
                 changeOp(idleOp);    
@@ -110,8 +118,11 @@ void ChargeOp::run(){
         maps.setIsDocked(true);               
         // get robot position and yaw from docking pos
         // sensing charging contacts means we are in docking station - we use docking point coordinates to get rid of false fix positions in
-        // docking station
-        maps.getDockingPos(stateX, stateY, stateDelta);
+        // docking station        
+        if (true){
+            maps.getDockingPos(stateX, stateY, stateDelta);
+            if (!DOCK_FRONT_SIDE) stateDelta = scalePI(stateDelta + 3.1415);
+        }
         // get robot yaw orientation from map 
         //float tempX;
         //float tempY;
@@ -138,7 +149,9 @@ void ChargeOp::run(){
                 CONSOLE.print(", timetable.mowingAllowed=");                
                 CONSOLE.print(timetable.mowingAllowed());
                 CONSOLE.print(", finishAndRestart=");                
-                CONSOLE.print(finishAndRestart);
+                CONSOLE.print(finishAndRestart);                
+                CONSOLE.print(", dockAfterFinish=");
+                CONSOLE.print(dockAfterFinish);
                 CONSOLE.println(")");
             }
             if (timetable.shouldAutostartNow()){
@@ -158,6 +171,7 @@ void ChargeOp::onTimetableStartMowing(){
 void ChargeOp::onChargerDisconnected(){
     if ((DOCKING_STATION) && (DOCK_RETRY_TOUCH)) {    
         CONSOLE.println("ChargeOp::onChargerDisconnected - retryTouchDock");
+        Logger.event(EVT_DOCK_RECOVERY);
         retryTouchDock = true;
         retryTouchDockStopTime = millis() + 5000;
         retryTouchDockSpeedTime = millis();
@@ -171,6 +185,7 @@ void ChargeOp::onChargerDisconnected(){
 void ChargeOp::onBadChargingContactDetected(){
     if ((DOCKING_STATION) && (DOCK_RETRY_TOUCH)) {    
         CONSOLE.println("ChargeOp::onBadChargingContactDetected - betterTouchDock");
+        Logger.event(EVT_DOCK_RECOVERY);
         betterTouchDock = true;
         betterTouchDockStopTime = millis() + 5000;
         retryTouchDockSpeedTime = millis();

@@ -33,6 +33,11 @@ void Bumper::run() {
   inputLeftPressed   = bumperDriver.getLeftBumper();
   inputRightPressed  = bumperDriver.getRightBumper();
 
+  if (BUMPER_INVERT){
+    inputLeftPressed = !inputLeftPressed;
+    inputRightPressed = !inputRightPressed;
+  }
+
   if (BUMPER_ENABLE){
     //outputLeftPressed = inputLeftPressed;
     //outputRightPressed = inputRightPressed;  
@@ -114,6 +119,10 @@ bool Bumper::obstacleRight(){
     return (outputRightPressed);
   }
   else return false;
+}
+
+bool Bumper::nearObstacle(){
+  return bumperDriver.nearObstacle();
 }
 
 // send separated signals without delay to sensortest

@@ -11,6 +11,12 @@
 #include "pid.h"
 #include "src/op/op.h"
 #include "Stats.h"
+#include "events.h"
+
+
+//PID pidLine(0.2, 0.01, 0); // not used
+//PID pidAngle(2, 0.1, 0);  // not used
+Polygon circle(8);
 
 float stanleyTrackingNormalK = STANLEY_CONTROL_K_NORMAL;
 float stanleyTrackingNormalP = STANLEY_CONTROL_P_NORMAL;
@@ -49,8 +55,10 @@ bool unDockTimer = false;
 bool oneTrigger = false;                        //MrTree
 bool printmotoroverload = false;
 float trackerDiffDelta = 0;
+float lastLineDist = 0;
 float targetDelta = 0;
 float distToPath = 0;
+/*
 int dockGpsRebootState;                     // Svol0: status for gps-reboot at specified docking point by undocking action
 int counterCheckPos = 0;                    // check if gps position is reliable
 bool blockKidnapByUndocking;                // Svol0: kidnap detection is blocked by undocking without gps
@@ -60,8 +68,9 @@ unsigned long dockGpsRebootFeedbackTimer;   // Svol0: timer to generate acustic 
 unsigned long reachedPointBeforeDockTime = 0;   //MrTree
 bool dockGpsRebootDistGpsTrg = false;       // Svol0: trigger to check solid gps-fix position (no jump)
 bool allowDockLastPointWithoutGPS = false;  // Svol0: allow go on docking by loosing gps fix
+*/
 bool allowDockRotation = true;              //MrTree: disable rotation on last dockingpoint
-bool warnDockWithoutGpsTrg = false;         // Svol0: Trigger for warnmessage
+//bool warnDockWithoutGpsTrg = false;         // Svol0: Trigger for warnmessage
 float stateX_1 = 0;                         // Svol0
 float stateY_1 = 0;                         // Svol0
 float stateX_2 = 0;                         // Svol0
@@ -288,7 +297,7 @@ float distanceRamp(float linear){
 
 void gpsConditions() {
   // check some pre-conditions that can make linear+angular speed zero
-  if (fixTimeout != 0) {
+  if ((stateLocalizationMode == LOC_GPS) && (fixTimeout != 0)){
     if (millis() > lastFixTime + fixTimeout * 1000.0) {
       activeOp->onGpsFixTimeout();
     }
@@ -302,26 +311,34 @@ void gpsConditions() {
   if (KIDNAP_DETECT) {
     float allowedPathTolerance = KIDNAP_DETECT_ALLOWED_PATH_TOLERANCE;
     if ( maps.isUndocking() || maps.isDocking() ) {
-      float dockX = 0;
-      float dockY = 0;
-      float dockDelta = 0;
-      maps.getDockingPos(dockX, dockY, dockDelta);
-      float dist = distance(dockX, dockY, stateX, stateY);
-      // check if current distance to docking station is below
-      // KIDNAP_DETECT_DISTANCE_DOCK_UNDOCK to trigger KIDNAP_DETECT_ALLOWED_PATH_TOLERANCE_DOCK_UNDOCK
-      if (dist < KIDNAP_DETECT_DISTANCE_DOCK_UNDOCK) {
-        allowedPathTolerance = KIDNAP_DETECT_ALLOWED_PATH_TOLERANCE_DOCK_UNDOCK;
-      }
-    }// MrTree integrated with keeping new sunray code Svol0: changed for GPS-Reboot at a
-    if (fabs(distToPath) > allowedPathTolerance) { // actually, this should not happen (except on false GPS fixes or robot being kidnapped...)
-      if (!stateKidnapped) {
+        float dockX = 0;
+        float dockY = 0;
+        float dockDelta = 0;
+        maps.getDockingPos(dockX, dockY, dockDelta);
+        float dist = distance(dockX, dockY, stateX, stateY);
+        // check if current distance to docking station is below
+        // KIDNAP_DETECT_DISTANCE_DOCK_UNDOCK to trigger KIDNAP_DETECT_ALLOWED_PATH_TOLERANCE_DOCK_UNDOCK
+        if (dist < KIDNAP_DETECT_DISTANCE_DOCK_UNDOCK) {
+            allowedPathTolerance = KIDNAP_DETECT_ALLOWED_PATH_TOLERANCE_DOCK_UNDOCK;
+        }
+    }
+    if ((stateLocalizationMode == LOC_GPS) && (fabs(distToPath) > allowedPathTolerance)){ // actually, this should not happen (except on false GPS fixes or robot being kidnapped...)
+      if (!stateKidnapped){
         stateKidnapped = true;
+        CONSOLE.print("KIDNAP_DETECT: stateKidnapped=");
+        CONSOLE.print(stateKidnapped);
+        CONSOLE.print(" distToPath=");
+        CONSOLE.println(distToPath);
         activeOp->onKidnapped(stateKidnapped);
       }
     } else {
       if (stateKidnapped) {
         stateKidnapped = false;
-        activeOp->onKidnapped(stateKidnapped);
+        CONSOLE.print("KIDNAP_DETECT: stateKidnapped=");
+        CONSOLE.print(stateKidnapped);
+        CONSOLE.print(" distToPath=");
+        CONSOLE.println(distToPath);
+        activeOp->onKidnapped(stateKidnapped);        
       }
     }
   }
