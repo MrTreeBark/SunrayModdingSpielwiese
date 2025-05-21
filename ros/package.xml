@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <package format="2">
     <name>sunray_node</name>
     <version>0.0.1</version>
@@ -26,3 +27,33 @@
   
   
   </package>
+=======
+<package format="2">
+    <name>sunray_node</name>
+    <version>0.0.1</version>
+    <description>
+      This package provides foo capability.
+    </description>
+    <maintainer email="foo@willowgarage.com">Foo</maintainer>
+    <license>BSD</license>    
+    
+    <buildtool_depend>catkin</buildtool_depend>
+  
+    <depend>roscpp</depend>
+  
+    <depend>geometry_msgs</depend>
+    <depend>nav_msgs</depend>
+    <depend>pcl_ros</depend>
+    <depend>sensor_msgs</depend>
+    <depend>std_msgs</depend>
+    <depend>std_srvs</depend>
+    <depend>tf2</depend>
+    <depend>tf2_geometry_msgs</depend>
+    <depend>tf2_ros</depend>
+    <depend>tf2_sensor_msgs</depend>
+    <depend>visualization_msgs</depend>
+
+  
+  
+  </package>
+>>>>>>> parent of 028fdc2 (Merge remote-tracking branch 'upstream/master')
