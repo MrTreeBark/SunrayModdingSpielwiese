@@ -13,7 +13,7 @@
 void processComm();
 void outputConsole();
 
-void processCmd(String channel, bool checkCrc, bool decrypt, bool verbose);
+void processCmd(bool checkCrc, bool decrypt);
 void processConsole();
 void cmdSwitchOffRobot();
 

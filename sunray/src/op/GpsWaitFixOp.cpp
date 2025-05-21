@@ -7,7 +7,6 @@
 #include <Arduino.h>
 #include "../../robot.h"
 #include "../../map.h"
-#include "../../events.h"
 
 String GpsWaitFixOp::name(){
     return "GpsWaitFix";
@@ -15,7 +14,6 @@ String GpsWaitFixOp::name(){
 
 void GpsWaitFixOp::begin(){
     CONSOLE.println("GpsWaitFixOp::begin - WARN: no gps solution!");
-    Logger.event(EVT_GPS_BAD);
     stateSensor = SENS_GPS_INVALID;
     //setOperation(OP_ERROR);
     //buzzer.sound(SND_STUCK, true);          

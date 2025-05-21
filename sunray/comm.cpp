@@ -9,7 +9,6 @@
 #include "mqtt.h"
 #include "httpserver.h"
 #include "ble.h"
-#include "events.h"
 
 #ifdef __linux__
   #include <BridgeClient.h>
@@ -165,11 +164,7 @@ void cmdControl(){
       } else if (counter == 8){
           if (intValue >= 0) sonar.enabled = (intValue == 1);
       } else if (counter == 9){
-          if (intValue >= 0) motor.setMowPwm(intValue);
-      } else if (counter == 10){
-          if (intValue >= 0) motor.setMowHeightMillimeter(intValue);
-      } else if (counter == 11){
-          if (intValue >= 0) dockAfterFinish = (intValue == 1);
+         if (intValue >= 0) motor.setMowPwm(intValue);
       }
       counter++;
       lastCommaIdx = idx;
@@ -282,7 +277,6 @@ void cmdTimetable(){
     stateSensor = SENS_MEM_OVERFLOW;
     setOperation(OP_ERROR);
   } else {
-    Logger.event(EVT_USER_UPLOAD_TIME_TABLE);
     saveState();
   }
 }
@@ -461,22 +455,10 @@ void cmdVersion(){
   s += F(",");
   s += encryptChallenge;
   s += F(",");
-  String board(BOARD);
-  #ifdef __linux__
-    Process p;
-    board = "Linux";
-    // returns: Sinovoip_Bananapi_M4, Raspberry Pi 5, etc.
-    p.runShellCommand("cat /sys/firmware/devicetree/base/model 2>/dev/null");        
-	  String boardAdd = p.readString();    
-    if (boardAdd != "") board += " " + boardAdd;
-    //board += getCPUArchitecture();
-  #endif
-  s += board;
+  s += BOARD;
   s += F(",");
   #ifdef DRV_SERIAL_ROBOT
     s += "SR";
-  #elif DRV_CAN_ROBOT
-    s += "CR";
   #elif DRV_ARDUMOWER
     s += "AM";
   #else 
@@ -500,14 +482,12 @@ void cmdVersion(){
     CONSOLE.println(encryptChallenge);
   }
   cmdAnswer(s);
-  Logger.event(EVT_APP_CONNECTED);
 }
 
 // request add obstacle
 void cmdObstacle(){
   String s = F("O");
   cmdAnswer(s);  
-  Logger.event(EVT_TRIGGERED_OBSTACLE);
   triggerObstacle();  
 }
 
@@ -538,9 +518,8 @@ void cmdTriggerWatchdog(){
   cmdAnswer(s);  
   setOperation(OP_IDLE);
   #ifdef __linux__
-    Logger.event(EVT_SYSTEM_RESTARTING);
     Process p;
-    p.runShellCommand("sleep 3; reboot");    
+    p.runShellCommand("reboot");    
   #else
     triggerWatchdog = true;  
   #endif
@@ -551,7 +530,6 @@ void cmdGNSSReboot(){
   String s = F("Y2");
   cmdAnswer(s);  
   CONSOLE.println("GNNS reboot");
-  Logger.event(EVT_GPS_RESTARTED);    
   gps.reboot();
 }
 
@@ -560,7 +538,6 @@ void cmdSwitchOffRobot(){
   String s = F("Y3");
   cmdAnswer(s);  
   setOperation(OP_IDLE);
-  Logger.event(EVT_SYSTEM_SHUTTING_DOWN);
   battery.switchOff();
 }
 
@@ -875,7 +852,7 @@ void cmdFirmwareUpdate(){
 }
 
 // process request
-void processCmd(String channel, bool checkCrc, bool decrypt, bool verbose){
+void processCmd(bool checkCrc, bool decrypt){
   cmdResponse = "";      
   if (cmd.length() < 4) return;
 #ifdef ENABLE_PASS
@@ -892,13 +869,10 @@ void processCmd(String channel, bool checkCrc, bool decrypt, bool verbose){
             cmd[i] = char(code);  
           }
         }
-        //#ifdef VERBOSE
-        if (verbose){  
-          CONSOLE.print(channel);
-          CONSOLE.print("(decrypt):");
+        #ifdef VERBOSE
+          CONSOLE.print("decrypt:");
           CONSOLE.println(cmd);
-        }
-        //#endif
+        #endif
       }
     } 
   }
@@ -907,8 +881,7 @@ void processCmd(String channel, bool checkCrc, bool decrypt, bool verbose){
   int idx = cmd.lastIndexOf(',');
   if (idx < 1){
     if (checkCrc){
-      CONSOLE.print(channel);
-      CONSOLE.print(":COMM CRC ERROR: ");
+      CONSOLE.print("COMM CRC ERROR: ");
       CONSOLE.println(cmd);
       return;
     }
@@ -921,8 +894,7 @@ void processCmd(String channel, bool checkCrc, bool decrypt, bool verbose){
     if ((simFaultyConn) && (simFaultConnCounter % 10 == 0)) crcErr = true;
     if ((expectedCrc != crc) && (checkCrc)) crcErr = true;      
     if (crcErr) {
-      CONSOLE.print(channel);
-      CONSOLE.print(":CRC ERROR");
+      CONSOLE.print("CRC ERROR");
       CONSOLE.print(crc,HEX);
       CONSOLE.print(",");
       CONSOLE.print(expectedCrc,HEX);
@@ -1001,7 +973,7 @@ void processConsole(){
       if ((ch == '\r') || (ch == '\n')) {        
         CONSOLE.print("CON:");
         CONSOLE.println(cmd);
-        processCmd("CON", false, false, false);              
+        processCmd(false, false);              
         CONSOLE.print(cmdResponse);    
         cmd = "";
       } else if (cmd.length() < 500){

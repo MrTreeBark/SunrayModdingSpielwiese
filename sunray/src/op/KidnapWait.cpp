@@ -8,14 +8,12 @@
 #include "../../robot.h"
 #include "../../LineTracker.h"
 #include "../../map.h"
-#include "../../events.h"
 
 String KidnapWaitOp::name(){
   return "KidnapWait";
 }
 
 void KidnapWaitOp::begin(){    
-  Logger.event(EVT_GPS_JUMP);
   stateSensor = SENS_KIDNAPPED;
   recoverGpsTime = millis() + 60000;
   recoverGpsCounter = 0;

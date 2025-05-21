@@ -4,30 +4,19 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <termios.h>
-#include <pthread.h>
 
 #include "Stream.h"
 #include "HardwareSerial.h"
-#include "fifo.h"
-
     
-#define LINUX_SERIAL_FIFO_SIZE_RX 20000
-#define LINUX_SERIAL_FIFO_SIZE_TX 20000
-
+#define SERIAL_BUF_SZ 8192
 
 class LinuxSerial : public HardwareSerial{
   protected:
-    int            _stream = 0;
+    int            _stream;
     struct termios _termios;
     String         devPath;
-    FiFo<byte, LINUX_SERIAL_FIFO_SIZE_TX> fifoRx;
-    FiFo<byte, LINUX_SERIAL_FIFO_SIZE_RX> fifoTx;
-    pthread_t thread_rx_id = 0;
-    pthread_t thread_tx_id = 0; 
     bool open(const char *devicePath);
     bool setBaudrate(uint32_t baudrate);
-    unsigned long frameCounterRx;
-    unsigned long frameCounterTx;    
   public:
     LinuxSerial() { _stream = 0; };
     LinuxSerial(const char *devicePath){
@@ -50,12 +39,8 @@ class LinuxSerial : public HardwareSerial{
     virtual size_t write(const uint8_t c) override;
     virtual size_t write(const uint8_t *buffer, size_t size) override;
 
-    virtual bool runTx();
-    virtual bool runRx();
-
     using Print::write; // pull in write(str) and write(buf, size) from Print
     operator bool() { return true; }
-
-  };
+};
 
 #endif

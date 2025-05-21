@@ -131,7 +131,7 @@ void processBLE(){
           CONSOLE.print("BLE:");     
           CONSOLE.println(cmd);        
         #endif
-        processCmd("BLE",true, true,false);              
+        processCmd(true, true);              
         BLE.print(cmdResponse);    
         cmd = "";
       } else if (cmd.length() < 500){

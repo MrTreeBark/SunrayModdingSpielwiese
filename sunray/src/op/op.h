@@ -61,7 +61,6 @@ class Op {
     // --------- events --------------------------------------
     virtual void onImuCalibration();
     virtual void onGpsJump();
-    virtual void onRelocalization();    
     virtual void onGpsNoSignal();
     virtual void onGpsFixTimeout();
     virtual void onDockGpsReboot();  
@@ -107,18 +106,6 @@ class ImuCalibrationOp: public Op {
   public:        
     unsigned long nextImuCalibrationSecond;
     int imuCalibrationSeconds;
-    virtual String name() override;
-    virtual void changeOp(Op &anOp, bool returnBackOnExit = false) override;
-    virtual void begin() override;
-    virtual void end() override;
-    virtual void run() override;
-};
-
-// relocalization op
-class RelocalizationOp: public Op {
-  public:        
-    unsigned long nextRelocalizationSecond;
-    int relocalizationSeconds;
     virtual String name() override;
     virtual void changeOp(Op &anOp, bool returnBackOnExit = false) override;
     virtual void begin() override;
@@ -357,7 +344,6 @@ extern GpsWaitFloatOp gpsWaitFloatOp;
 extern GpsRebootRecoveryOp gpsRebootRecoveryOp;
 extern DockGpsRebootOp dockGpsRebootOp;
 extern ImuCalibrationOp imuCalibrationOp;
-extern RelocalizationOp relocalizationOp;
 
 // active op
 extern Op *activeOp;

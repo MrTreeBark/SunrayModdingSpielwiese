@@ -79,8 +79,6 @@ void SimMotorDriver::begin(){
 void SimMotorDriver::run(){
 }
 
-void SimMotorDriver::setMowHeight(int mowHeightMillimeter){
-}
 
 // linear: m/s
 // angular: rad/s
@@ -92,7 +90,7 @@ void SimMotorDriver::setMowHeight(int mowHeightMillimeter){
 //      V     = (VR + VL) / 2       =>  VR = V + omega * L/2
 //      omega = (VR - VL) / L       =>  VL = V - omega * L/2
 
-void SimMotorDriver::setMotorPwm(int leftPwm, int rightPwm, int mowPwm, bool releaseBrakesWhenZero){  
+void SimMotorDriver::setMotorPwm(int leftPwm, int rightPwm, int mowPwm){  
 
   float deltaT = 0;
   if (lastSampleTime != 0){
@@ -322,11 +320,6 @@ void SimBumperDriver::begin(){
 void SimBumperDriver::run(){
 
 }
-
-bool SimBumperDriver::nearObstacle(){
-  return false;
-}
-
 
 bool SimBumperDriver::obstacle(){
   return (simTriggered || simRobot.robotIsBumpingIntoObstacle);
@@ -588,12 +581,6 @@ void SimGpsDriver::setSimSolution(SolType sol){
 
 void SimGpsDriver::setSimGpsJump(bool flag){
   simGpsJump = flag;
-}
-
-void SimGpsDriver::send(const uint8_t *buffer, size_t size) {  
-}  
-
-void SimGpsDriver::sendRTCM(const uint8_t *buffer, size_t size){
 }
 
 

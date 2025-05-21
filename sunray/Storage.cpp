@@ -62,9 +62,7 @@ void dumpState(){
   CONSOLE.print(" finishAndRestart=");
   CONSOLE.print(finishAndRestart);
   CONSOLE.print(" motorMowForwardSet=");
-  CONSOLE.print(motor.motorMowForwardSet);  
-  CONSOLE.print(" dockAfterFinish=");
-  CONSOLE.println(dockAfterFinish);
+  CONSOLE.println(motor.motorMowForwardSet);  
 }
 
 void updateStateOpText(){
@@ -159,7 +157,6 @@ bool loadState(){
   res &= (stateFile.read((uint8_t*)&motor.motorMowForwardSet, sizeof(motor.motorMowForwardSet)) != 0); 
   res &= (stateFile.read((uint8_t*)&timetable.timetable, sizeof(timetable.timetable)) != 0);
   res &= (stateFile.read((uint8_t*)&battery.docked, sizeof(battery.docked)) != 0);  
-  res &= (stateFile.read((uint8_t*)&dockAfterFinish, sizeof(dockAfterFinish)) != 0);
   stateFile.close();  
   CONSOLE.println("ok");
   stateCRC = calcStateCRC();
@@ -215,8 +212,7 @@ bool saveState(){
   res &= (stateFile.write((uint8_t*)&finishAndRestart, sizeof(finishAndRestart)) != 0);  
   res &= (stateFile.write((uint8_t*)&motor.motorMowForwardSet, sizeof(motor.motorMowForwardSet)) != 0);
   res &= (stateFile.write((uint8_t*)&timetable.timetable, sizeof(timetable.timetable)) != 0);  
-  res &= (stateFile.write((uint8_t*)&battery.docked, sizeof(battery.docked)) != 0);
-  res &= (stateFile.write((uint8_t*)&dockAfterFinish, sizeof(dockAfterFinish)) != 0);  
+  res &= (stateFile.write((uint8_t*)&battery.docked, sizeof(battery.docked)) != 0);  
   if (res){
     CONSOLE.println("ok");
   } else {

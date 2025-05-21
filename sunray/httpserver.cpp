@@ -28,9 +28,7 @@ unsigned long nextWifiClientCheckTime = 0;
 ERingBuffer buf(8);
 int reqCount = 0;                // number of requests received
 unsigned long stopClientTime = 0;
-unsigned long wifiVerboseStopTime = 0;
-unsigned long wifiLastClientAvailableWait = 0;
-int wifiLastClientAvailable = 0;
+
 
 
 // process WIFI input (relay client)
@@ -80,7 +78,7 @@ void processWifiRelayClient(){
         CONSOLE.print("WIF:");
         CONSOLE.println(cmd);
         if (wifiClient.connected()) {
-          processCmd("WIF", true,true,true);
+          processCmd(true,true);
           String s = "HTTP/1.1 200 OK\r\n";
             s += "Host: " RELAY_USER "." RELAY_MACHINE "." RELAY_HOST ":";        
             s += String(RELAY_PORT) + "\r\n";
@@ -108,11 +106,6 @@ void processWifiAppServer()
 {
   if (!wifiFound) return;
   if (!ENABLE_SERVER) return;
-  if (wifiLastClientAvailableWait != 0){
-    if (millis() < wifiLastClientAvailableWait) return;
-    wifiLastClientAvailableWait = 0;
-  }
-
   // listen for incoming clients    
   if (client){
     if (stopClientTime != 0) {
@@ -135,14 +128,8 @@ void processWifiAppServer()
       CONSOLE.println("New client");             // print a message out the serial port
     #endif
     battery.resetIdle();
-    buf.init();                               // initialize the circular buffer  
-    if (client.available() != wifiLastClientAvailable) {
-      wifiLastClientAvailable = client.available();
-      wifiLastClientAvailableWait = millis() + 50;
-      return;
-    }
+    buf.init();                               // initialize the circular buffer
     unsigned long timeout = millis() + 50;
-    unsigned long httpStartTime = millis(); 
     while ( (client.connected()) && (millis() < timeout) ) {              // loop while the client's connected
       if (client.available()) {               // if there's bytes to read from the client,        
         char c = client.read();               // read a byte, then
@@ -158,15 +145,12 @@ void processWifiAppServer()
             cmd = cmd + ch;
             gps.run();
           }
-          if (millis() > wifiVerboseStopTime){
-            wifiVerboseStopTime = 0;
-          }    
-          if (wifiVerboseStopTime != 0){          
+          #ifdef VERBOSE
             CONSOLE.print("WIF:");
-            CONSOLE.println(cmd);            
-          }
+            CONSOLE.println(cmd);
+          #endif
           if (client.connected()) {
-            processCmd("WIF",true,true, (wifiVerboseStopTime != 0) );
+            processCmd(true,true);
             client.print(
               "HTTP/1.1 200 OK\r\n"
               "Access-Control-Allow-Origin: *\r\n"              
@@ -186,13 +170,6 @@ void processWifiAppServer()
     }    
     // give the web browser time to receive the data
     stopClientTime = millis() + 100;
-    unsigned long httpEndTime = millis();    
-    int httpDuration = httpEndTime - httpStartTime;
-    if (httpDuration > 500){
-      wifiVerboseStopTime = millis() + 30000;
-      CONSOLE.print("HTTP WARN: high server duration: ");
-      CONSOLE.println(httpDuration);
-    }
     //delay(10);
     // close the connection
     //client.stop();

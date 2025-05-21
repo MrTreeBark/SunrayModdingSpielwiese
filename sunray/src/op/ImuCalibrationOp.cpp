@@ -8,8 +8,6 @@
 #include "../../robot.h"
 #include "../../map.h"
 #include "../../StateEstimator.h"
-#include "../../events.h"
-
 
 
 String ImuCalibrationOp::name(){
@@ -27,8 +25,7 @@ void ImuCalibrationOp::changeOp(Op &anOp, bool returnBackOnExit){
 void ImuCalibrationOp::begin(){
     nextImuCalibrationSecond = 0;
     imuCalibrationSeconds = 0;
-    //motor.stopImmediately(true);
-    Logger.event(EVT_IMU_CALIBRATING);
+    motor.stopImmediately(true);
 }
 
 

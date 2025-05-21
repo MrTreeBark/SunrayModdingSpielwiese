@@ -75,11 +75,10 @@ void LidarGpsDriver::run(){
 
 
 LidarImuDriver::LidarImuDriver(){    
-  dataAvail = false;
-  imuFound = false;
 }
 
-void LidarImuDriver::detect(){  
+void LidarImuDriver::detect(){
+  imuFound = true;
 }
 
 
@@ -93,11 +92,8 @@ void LidarImuDriver::run(){
 
 
 bool LidarImuDriver::isDataAvail(){
- 
-    bool res = dataAvail;
-    dataAvail = false; 
-    return res;
 
+    return true;
 }         
     
 void LidarImuDriver::resetData(){
@@ -105,42 +101,5 @@ void LidarImuDriver::resetData(){
 }
 
 
-// ---------------------------------------------------------
-
-
-LidarBumperDriver::LidarBumperDriver(){ 
-  triggerBumper = false;
-  triggerNearObstacle = false;
-}
-
-
-void LidarBumperDriver::begin(){
-  CONSOLE.println("using bumper driver: LiDAR");    
-}
-
-void LidarBumperDriver::run(){
-
-}
-
-bool LidarBumperDriver::nearObstacle(){
-  return triggerNearObstacle;
-}
-
-bool LidarBumperDriver::obstacle(){
-  return triggerBumper;
-}
-
-bool LidarBumperDriver::getLeftBumper(){
-  return triggerBumper;
-}
-
-bool LidarBumperDriver::getRightBumper(){
-  return triggerBumper;
-}	
-
-void LidarBumperDriver::getTriggeredBumper(bool &leftBumper, bool &rightBumper){
-  leftBumper = triggerBumper;
-  rightBumper = triggerBumper;
-}  	  		    
 
 

@@ -59,6 +59,6 @@ public:
     friend class DNSClient;
 };
 
-extern IPAddress INADDR4_NONE; 
+const IPAddress INADDR4_NONE(0,0,0,0);
 
 #endif

@@ -17,9 +17,5 @@ extern LinuxSerial SerialGPS;
 extern LinuxSerial SerialNTRIP;
 
 
-extern "C" {
-  const char *getCPUArchitecture(); //Get current architecture, detectx nearly every architecture. 
-}
-
 #endif  // __linux__
 
