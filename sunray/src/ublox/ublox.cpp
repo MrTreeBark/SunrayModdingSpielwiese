@@ -7,10 +7,9 @@
 #include "ublox.h"
 #include "../../config.h"
 #include "../../events.h"
-#include "SparkFun_Ublox_Arduino_Library.h" 
-//#include "SparkFun_u-blox_GNSS_v3.h"
-//SFE_UBLOX_GNSS_SERIAL configGPS; 
-SFE_UBLOX_GPS configGPS; // used for f9p module configuration only
+//#include "SparkFun_Ublox_Arduino_Library.h" 
+#include "SparkFun_u-blox_GNSS_v3.h"
+SFE_UBLOX_GNSS_SERIAL configGPS; 
 
 
 // used to send .ubx log files via 'sendgps.py' to Arduino (also set GPS to Serial in config for this)
@@ -279,7 +278,7 @@ bool UBLOX::configure(){
           setValueSuccess &= configGPS.addCfgValset8(0x201100a4, CPG_CONFIG_FILTER_MINELEV); // CFG-NAVSPG-INFIL_MINELEV  (10 Min SV elevation degree)
           setValueSuccess &= configGPS.addCfgValset8(0x201100aa, CPG_CONFIG_FILTER_NCNOTHRS); // CFG-NAVSPG-INFIL_NCNOTHRS (10 C/N0 Threshold #SVs)
           setValueSuccess &= configGPS.addCfgValset8(0x201100ab, CPG_CONFIG_FILTER_CNOTHRS); // CFG-NAVSPG-INFIL_CNOTHRS  (30 dbHz)
-          //setValueSuccess &= configGPS.addCfgValset8(UBLOX_CFG_NAVSPG_INFIL_MINCNO, CPG_CONFIG_FILTER_MINCNO); // CFG-NAVSPG-INFIL_MINCNO  (30 dbHz) only works with v3 library
+          setValueSuccess &= configGPS.addCfgValset8(UBLOX_CFG_NAVSPG_INFIL_MINCNO, CPG_CONFIG_FILTER_MINCNO); // CFG-NAVSPG-INFIL_MINCNO  (30 dbHz) 
         } else { // ublox default filter settings
           setValueSuccess &= configGPS.addCfgValset8(0x201100a4, 10); // CFG-NAVSPG-INFIL_MINELEV  (10 Min SV elevation degree)
           setValueSuccess &= configGPS.addCfgValset8(0x201100aa, 0);  // CFG-NAVSPG-INFIL_NCNOTHRS (0 C/N0 Threshold #SVs)
